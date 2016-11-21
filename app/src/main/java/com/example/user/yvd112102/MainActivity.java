@@ -1,8 +1,13 @@
 package com.example.user.yvd112102;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -22,13 +27,13 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 public class MainActivity extends AppCompatActivity {
-
+    ListView lv;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        new Thread(){
+        lv = (ListView) findViewById(R.id.listView);
+        new Thread() {
             @Override
             public void run() {
                 super.run();
@@ -52,12 +57,35 @@ public class MainActivity extends AppCompatActivity {
                     }
                     String str = result.toString();
                     Log.d("NET", str);
-                    MyDataHandler dataHandler = new MyDataHandler();
+                    final MyDataHandler dataHandler = new MyDataHandler();
                     SAXParserFactory spf = SAXParserFactory.newInstance();
                     SAXParser sp = spf.newSAXParser();
                     XMLReader xr = sp.getXMLReader();
                     xr.setContentHandler(dataHandler);
                     xr.parse(new InputSource(new StringReader(str)));
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(
+                                    MainActivity.this,
+                                    android.R.layout.simple_list_item_1,
+                                    dataHandler.titleList
+                            );
+
+                            lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                @Override
+                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                    Intent it = new Intent(MainActivity.this, DetailActivity.class);
+                                    it.putExtra("str_url", dataHandler.linkList.get(position));
+                                    startActivity(it);
+
+                                }
+                            });
+
+                            lv.setAdapter(adapter);
+                        }
+                    });
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                 } catch (ProtocolException e) {
@@ -73,7 +101,5 @@ public class MainActivity extends AppCompatActivity {
 
             }
         }.start();
-
-
     }
 }
