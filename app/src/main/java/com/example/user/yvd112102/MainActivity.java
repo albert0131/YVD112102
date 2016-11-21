@@ -39,6 +39,7 @@ public class MainActivity extends AppCompatActivity {
                 super.run();
                 InputStream inputStream = null;
 
+                //----- 讀取XML資料(基本寫法) -------------------------
                 String str_url = "http://udn.com/rssfeed/news/1";
                 URL url = null;
                 try {
@@ -57,13 +58,18 @@ public class MainActivity extends AppCompatActivity {
                     }
                     String str = result.toString();
                     Log.d("NET", str);
+                // ---------------------------------------------------------
+
+                    // ---- 利用SAXParser 解析XML, 與用dataHandler 做字串判斷
                     final MyDataHandler dataHandler = new MyDataHandler();
                     SAXParserFactory spf = SAXParserFactory.newInstance();
                     SAXParser sp = spf.newSAXParser();
                     XMLReader xr = sp.getXMLReader();
                     xr.setContentHandler(dataHandler);
                     xr.parse(new InputSource(new StringReader(str)));
+                    // -------------------------------------------------
 
+                    // -------- UI
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
